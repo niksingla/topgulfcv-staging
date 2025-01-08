@@ -1,0 +1,3 @@
+.post-type-free_services tr.type-free_services:hover .row-actions {
+    display: none;
+}
