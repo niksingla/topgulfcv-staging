@@ -19,7 +19,7 @@ if (!defined("_S_VERSION")) {
  * runs before the init hook. The init hook is too late for some features, such
  * as indicating support for post thumbnails.
  */
-function topgulfcv_setup() 
+function topgulfcv_setup()
 {
     /*
      * Make theme available for translation.
@@ -2046,4 +2046,43 @@ function custom_price_html($html, $price, $args, $unformatted_price, $original_p
 add_filter( 'wc_price', 'custom_price_html', $html, 6);
 
 
-?>
+add_filter('wpcf7_form_hidden_fields', 'add_post_id_to_hidden_fields');
+
+function add_post_id_to_hidden_fields($hidden_fields) {
+
+    $success_page_link = get_field('success_page_link');
+    if($success_page_link){
+        $slug = trim(parse_url($success_page_link, PHP_URL_PATH), '/');
+        $success_page_id = url_to_postid($slug);
+        if($success_page_id){
+            $hidden_fields['success-post-id'] = $success_page_id;
+        }
+    }
+    
+    return $hidden_fields;
+}
+
+add_filter('wpcf7_mail_components', 'add_acf_attachments_to_mail2', 10, 3);
+
+function add_acf_attachments_to_mail2($mail_components, $contact_form, $instance) {
+    if($instance->name() == 'mail_2'){
+        $submission = WPCF7_Submission::get_instance();
+        $data = $submission->get_posted_data();
+        if (isset($data['success-post-id']) && !empty($data['success-post-id'])) {
+            $attachments = get_field('upload_file',$data['success-post-id']);
+            if(isset($attachments) && !empty($attachments)){
+                if ( $mail_2 = $contact_form->prop( 'mail_2' ) and $mail_2['active'] ) {                                        
+                    foreach ($attachments as $attachmentt) {
+                        $url = $attachmentt['cv'] ? $attachmentt['cv']: null;
+                        $relative_path = str_replace(content_url(), '', $url);
+                        $file_path = WP_CONTENT_DIR . parse_url($relative_path, PHP_URL_PATH);
+                        if (file_exists($file_path)) {
+                            $mail_components['attachments'][] = $file_path;
+                        }
+                    }
+                }        
+            }
+        }
+    }          
+    return $mail_components;
+}
