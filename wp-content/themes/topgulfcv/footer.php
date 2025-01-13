@@ -115,22 +115,45 @@
 </script>
 <script type="text/javascript">
     jQuery(document).ready(function() {
+        let isCartBarOpen = false
         function isMobile() {
             return window.innerWidth <= 768; // Adjust the breakpoint as needed
         }
 
         jQuery("#open-call").on("click", function(e) {
             e.preventDefault();
-            if (isMobile()) {
-                jQuery(".cart_wraper").animate({
-                    height: "toggle"
-                }, 700);
+            if(!isCartBarOpen){
+                if (isMobile()) {
+                    jQuery(".cart_wraper").animate({
+                        height: "toggle"
+                    }, 700);
+                } else {
+                    jQuery(".cart_wraper").animate({
+                        width: "toggle"
+                    }, 700);
+                }
+                // jQuery("#open-call").toggleClass("opened closed");
+                isCartBarOpen = true
             } else {
-                jQuery(".cart_wraper").animate({
-                    width: "toggle"
-                }, 700);
+                isCartBarOpen = false
             }
-            jQuery("#open-call").toggleClass("opened closed");
+        });
+        jQuery(".add-to-cart-btn").on("click", function(e) {
+            e.preventDefault();            
+            
+            if(!isCartBarOpen){
+                if (isMobile()) {
+                    jQuery(".cart_wraper").animate({
+                        height: "toggle"
+                    }, 700);
+                } else {
+                    jQuery(".cart_wraper").animate({
+                        width: "toggle"
+                    }, 700);
+                }
+                isCartBarOpen = true
+                // jQuery(".add-to-cart-btn").toggleClass("opened closed");         
+            }
         });
 
         jQuery(".closeall").click(function() {
@@ -143,6 +166,7 @@
                     width: "toggle"
                 }, 700);
             }
+            isCartBarOpen = false
         });
     });
 </script>
@@ -228,39 +252,6 @@
             });
         }
     })
-</script>
-<script type="text/javascript">
-    jQuery(document).ready(function() {
-        function isMobile() {
-            return window.innerWidth <= 768; // Adjust the breakpoint as needed
-        }
-
-        jQuery(".add-to-cart-btn").on("click", function(e) {
-            e.preventDefault();
-            if (isMobile()) {
-                jQuery(".cart_wraper").animate({
-                    height: "toggle"
-                }, 700);
-            } else {
-                jQuery(".cart_wraper").animate({
-                    width: "toggle"
-                }, 700);
-            }
-            jQuery(".add-to-cart-btn").toggleClass("opened closed");
-        });
-
-        jQuery(".closeall").click(function() {
-            if (isMobile()) {
-                jQuery(".cart_wraper").hide({
-                    height: "toggle"
-                }, 700);
-            } else {
-                jQuery(".cart_wraper").hide({
-                    width: "toggle"
-                }, 700);
-            }
-        });
-    });
 </script>
 
 <script type="text/javascript">

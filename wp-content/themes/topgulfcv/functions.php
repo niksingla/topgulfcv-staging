@@ -2042,12 +2042,10 @@ function custom_price_html($html, $price, $args, $unformatted_price, $original_p
     }
     return $html;
 }
-
 add_filter( 'wc_price', 'custom_price_html', $html, 6);
 
 
 add_filter('wpcf7_form_hidden_fields', 'add_post_id_to_hidden_fields');
-
 function add_post_id_to_hidden_fields($hidden_fields) {
 
     $success_page_link = get_field('success_page_link');
@@ -2063,7 +2061,6 @@ function add_post_id_to_hidden_fields($hidden_fields) {
 }
 
 add_filter('wpcf7_mail_components', 'add_acf_attachments_to_mail2', 10, 3);
-
 function add_acf_attachments_to_mail2($mail_components, $contact_form, $instance) {
     if($instance->name() == 'mail_2'){
         $submission = WPCF7_Submission::get_instance();
@@ -2086,3 +2083,32 @@ function add_acf_attachments_to_mail2($mail_components, $contact_form, $instance
     }          
     return $mail_components;
 }
+
+function get_cart_products_callback() {
+    if ( ! class_exists( 'WooCommerce' ) ) {
+        wp_send_json_error( 'WooCommerce is not active.' );
+        return;
+    }
+
+    $cart_items = WC()->cart->get_cart();
+    $products = [];
+
+    foreach ( $cart_items as $cart_item ) {
+        $product = $cart_item['data'];
+        $product_id = $product->get_id();
+        $product_name = $product->get_name();
+        $product_price = $price = get_post_meta($product_id, '_price', true);
+        $product_image_url = wp_get_attachment_url( $product->get_image_id() );
+
+        $products[] = [
+            'id'    => $product_id,
+            'name'  => $product_name,
+            'price' => $product_price,
+            'image' => $product_image_url
+        ];
+    }
+
+    wp_send_json_success( $products );
+}
+add_action( 'wp_ajax_get_cart_products', 'get_cart_products_callback' );
+add_action( 'wp_ajax_nopriv_get_cart_products', 'get_cart_products_callback' );
