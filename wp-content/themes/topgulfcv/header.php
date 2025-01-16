@@ -17,6 +17,12 @@
     <!-- <link rel="profile" href="https://gmpg.org/xfn/11"> -->
     <link rel="stylesheet" href="https://cdn.rawgit.com/michalsnik/aos/2.0.4/dist/aos.css" />
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="preload" href="<?= site_url();?>/wp-content/themes/topgulfcv/fonts/PlusJakartaSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="<?= site_url();?>/wp-content/themes/topgulfcv/fonts/PlusJakartaSans-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="<?= site_url();?>/wp-content/themes/topgulfcv/fonts/Rubik-Medium.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="<?= site_url();?>/wp-content/themes/topgulfcv/fonts/Rubik-SemiBold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="<?= site_url();?>/wp-content/themes/topgulfcv/fonts/Rubik-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.2/css/fontawesome.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />

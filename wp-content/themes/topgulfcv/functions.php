@@ -2112,3 +2112,8 @@ function get_cart_products_callback() {
 }
 add_action( 'wp_ajax_get_cart_products', 'get_cart_products_callback' );
 add_action( 'wp_ajax_nopriv_get_cart_products', 'get_cart_products_callback' );
+
+function preload_style_css() {
+    echo "<link rel='preload' href='" . get_template_directory_uri() . "/css/style.css' as='style' />";
+}
+add_action('wp_head', 'preload_style_css');

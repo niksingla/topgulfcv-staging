@@ -60,7 +60,7 @@
                             </div>
                         <?php endif; ?>
                               </a>
-                                <h4><?php the_title(); ?></h4>
+                                
 
                                 <!-- <div class="jobImage">
                                     <div class="image-card">

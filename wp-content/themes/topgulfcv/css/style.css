@@ -1494,18 +1494,16 @@ section.blog {
 }
 
 .bannerdetails img {
-  height: 450px; 
+  height: 450px;
 }
 
 
 .banner-slider .owl-dots {
-  display: flex;
-  justify-content: center;
-  margin: 0 0 0 -85px;
   background-color: none;
-  position: absolute;
-  left: 50%;
-  bottom: 10px;
+  text-align: center;
+  margin-top: -35px;
+  position: relative;
+  z-index: 1;
 }
 
 .banner-slider .owl-dot span {
