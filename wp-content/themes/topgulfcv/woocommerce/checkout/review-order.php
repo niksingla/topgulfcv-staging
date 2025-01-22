@@ -190,40 +190,7 @@ defined( 'ABSPATH' ) || exit;
 					window.location.reload();
 				});
 			});
-			let urlString = location.href;
-			let paramString = urlString.split('?')[1];
-			let queryString = new URLSearchParams(paramString);
-			var email = ''
-			var fname = ''
-			var lname = ''
-			var service_id = 0
-			var billing_city = ''
-			var billing_country = ''
-			let userData = localStorage.getItem('userData')
-			if(userData){
-				userData = JSON.parse(userData)
-				if(userData){
-					fname = userData['fname']
-					lname = userData['lname']
-					email = userData['email']					
-					billing_city = userData['city']					
-				}
-			}
-			for(let pair of queryString.entries()) {
-				if(pair[0]=='service_id') service_id = pair[1]								
-				if(pair[0]=='country') billing_country = pair[1]				
-			}			
-			if(fname && lname && email && service_id && billing_city && billing_country){
-				jQuery('[name="billing_email"]').val(email)
-				jQuery('[name="billing_first_name"]').val(fname)
-				jQuery('[name="billing_last_name"]').val(lname)
-				jQuery('[name="billing_service_id"]').val(service_id)
-				jQuery('[name="billing_city"]').val(billing_city)
-				jQuery('[name="billing_country"]').val(billing_country)
-			} else {
-				alert('Please fill in your details first.');
-				location.href = "<?= site_url('signup'); ?>";
-			}
+			
 		});
 		if(jQuery != null){
 			convert_aed_to_usd()

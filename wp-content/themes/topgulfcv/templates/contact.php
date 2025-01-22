@@ -15,8 +15,16 @@ get_header();
 
     <div class="sub-banner cont-banner banner-inner">
         <div class="container" data-aos="fade-down">
-            <div class="sub-banner-content">
-                <h1 class="section-title"><?php the_field('banner_heading'); ?></h1>
+            <div class="sub-banner-content">                
+                <?php 
+                $set = get_field('banner_heading_set');
+                if ($set && $set['banner_heading']) : 
+                    $style = '';
+                    if (!empty($set['font_size'])) $style .= "font-size:{$set['font_size']}px !important;";
+                    if (!empty($set['font_color'])) $style .= "color:{$set['font_color']} !important;";
+                    ?>
+                    <h1 class="section-title" style="<?php echo esc_attr($style); ?>"><?php echo esc_html($set['banner_heading']); ?></h1>
+                <?php endif; ?>                
                 <p><?php the_field('banner_paragraph'); ?>
                 </p>
             </div>

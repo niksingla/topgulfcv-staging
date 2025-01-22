@@ -21,10 +21,7 @@ defined( 'ABSPATH' ) || exit;
 
 if ( $order ) :
 
-   // Retrieve user email from the URL query parameters
-   $url_components = parse_url($_SERVER['HTTP_REFERER']);
-   parse_str($url_components['query'], $params);
-   $email = isset($params['email']) ? $params['email'] : '';
+   $email = $order->get_billing_email();
 
    $items = $order->get_items();
    $service_names = array();

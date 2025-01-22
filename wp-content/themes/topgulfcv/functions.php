@@ -325,23 +325,23 @@ $echo = ob_get_clean();
 }
 function add_animation_script()
 {
+    $order = wc_get_order(4437);
+    $item_names = [];
+    foreach ($order->get_items() as $item) {
+        $product = wc_get_product($item->get_product_id());
+        if ($product) {
+            $item_names[] = $product->get_name();
+        }
+    }
+    
     ?>
 	<script type="text/javascript">
-		const observer = new IntersectionObserver(entries => {
-			entries.forEach(entry => {
-			if (entry.isIntersecting) {
-					entry.target.classList.add('onscroll-anime');
-					observer.unobserve(entry.target);
-				}
-			})
-		})
-        if(document.querySelector(".anime-on-scroll") != null){
-            observer.observe(document.querySelector(".anime-on-scroll"))
-        }
+		console.log(<?php echo json_encode($item_names);?>);
+        
 	</script>
 	<?php
 }
-// add_action("wp_footer", "add_animation_script");
+add_action("wp_footer", "add_animation_script");
 
 // Register Custom Post Type
 function custom_slider_post_type()
@@ -2117,3 +2117,6 @@ function preload_style_css() {
     echo "<link rel='preload' href='" . get_template_directory_uri() . "/css/style.css' as='style' />";
 }
 add_action('wp_head', 'preload_style_css');
+
+/**Customize woocommerce checkout fields */
+require 'custom-woo-checkout.php';

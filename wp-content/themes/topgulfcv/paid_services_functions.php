@@ -195,7 +195,7 @@ function custom_columns_content($column_name, $post_id)
         echo get_post_meta($post_id, "amount", true);
     }
     if ($column_name == "order-no") {
-        echo $post_id ? $post_id+1 : '-';
+        echo $post_id ? $order_number : '-';
         // $email = get_post_meta($post_id, "email", true);
         // $user = get_user_by('email', $email);
         // if ($user) {
@@ -208,21 +208,25 @@ function custom_columns_content($column_name, $post_id)
 
     }
    
-    $selected_services = get_post_meta($post_id, "selected_services", true);
     if ($column_name == "service1") {
-        // $echo = $selected_services;
-        $order_id = $post_id ? $post_id+1 : '-';
-
-        if ($order_id) {
-            $order = wc_get_order($order_id);
-        
-            if ($order) {
-                foreach ($order->get_items() as $item_id => $item) {
-                    $product_name = $item->get_name();
-                    echo $product_name . ',';
-                }
+        $selected_services = get_post_meta($post_id, "selected_services", true);
+        if($selected_services){        
+            echo $selected_services;
+        } else {
+            // $echo = $selected_services;
+            $order_id = $post_id ? $post_id+1 : '-';
+    
+            if ($order_id) {
+                $order = wc_get_order($order_id);
+            
+                if ($order) {
+                    foreach ($order->get_items() as $item_id => $item) {
+                        $product_name = $item->get_name();
+                        echo $product_name . ',';
+                    }
+                } 
             } 
-        } 
+        }
         $uploaded_resume = get_post_meta($post_id, "uploaded_resume", true);
         if ($uploaded_resume) {
             $echo .= '<br><strong>Resume</strong>: <a href="' . $uploaded_resume . '" target="_blank">' . basename($uploaded_resume) . '</a>';
