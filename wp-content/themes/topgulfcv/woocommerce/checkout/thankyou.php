@@ -22,65 +22,6 @@ defined( 'ABSPATH' ) || exit;
 if ( $order ) :
 
    $email = $order->get_billing_email();
-
-   $items = $order->get_items();
-   $service_names = array();
-   foreach ( $items as $item ) {  
-       $service_names[] = $item->get_name();
-   }
-    $services = implode(', ', $service_names);
-    $options = get_option('custom_email_options');
-    $custom_subject = $options['custom_email_subject'] ?? 'Thank You for Your Order';
-    $custom_message = get_custom_email_message(); 
-
-
-    $message = "<table border='0' cellpadding='0' cellspacing='0' width='100%' class='wrapperBody' style='max-width:600px'>
-        <tbody>
-            <tr>
-                <td align='center' valign='top'>
-                    <table border='0' cellpadding='0' cellspacing='0' width='100%' class='tableCard' style='background-color:#fff;border-color:#e5e5e5;border-style:solid;border-width:0 1px 1px 1px;'>
-                        <tbody>
-                            <tr>
-                                <td style='background-color:#00d2f4;font-size:1px;line-height:3px' class='topBorder' height='3'>&nbsp;</td>
-                            </tr>
-                            <tr>
-                                <td style='padding-top: 60px; padding-bottom: 20px;' align='center' valign='middle' class='emailLogo'>
-                                    <a href='#' style='text-decoration:none' target='_blank'>
-                                        <img alt='' border='0' src='https://topgulfcv.com/wp-content/themes/topgulfcv/images/topgulf.png' style='width:100%;max-width:150px;height:auto;display:block' width='150'>
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style='padding-left:20px;padding-right:20px' align='center' valign='top' class='containtTable ui-sortable'>
-                                    <table border='0' cellpadding='0' cellspacing='0' width='100%' class='tableButton'>
-                                        <tbody>
-                                            <tr>
-                                                <td style='padding-left:20px;padding-right:20px' valign='top' class='containtTable ui-sortable'>
-                                                    $custom_message
-                                                </td>
-                                            </tr>   
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style='font-size:1px;line-height:1px' height='20'>&nbsp;</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </tbody>
-    </table>";
-
-    $serv = "$services";
-    $message = str_replace('[service_names]',$serv,$message);
-    if ($email) {
-        $headers = array('Content-Type: text/html; charset=UTF-8');
-        wp_mail($email, $custom_subject, $message, $headers);
-    }
-
-    
     // Update user meta for order number and payment method using billing email
     $user = get_user_by( 'email', $email );
     if ( $user ) {
@@ -127,13 +68,6 @@ if ( $order ) :
                 <?php esc_html_e( 'Email:', 'woocommerce' ); ?>
                 <strong><?php echo $email ? $email:''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></strong>
             </li>
-
-            <?php if ( is_user_logged_in() && $order->get_user_id() === get_current_user_id() && $order->get_billing_email() ) : ?>
-                <li class="woocommerce-order-overview__email email">
-                    <?php esc_html_e( 'Email:', 'woocommerce' ); ?>
-                    <strong><?php echo $order->get_billing_email(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></strong>
-                </li>
-            <?php endif; ?>
 
             <li class="woocommerce-order-overview__total total">
                 <?php esc_html_e( 'Total:', 'woocommerce' ); ?>

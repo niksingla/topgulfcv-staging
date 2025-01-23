@@ -58,11 +58,7 @@ defined( 'ABSPATH' ) || exit;
 					}
 				}
 			}
-		?>
-		<script>
-			console.log(<?php echo json_encode(WC()->session)?>);
-			
-		</script>
+		?>		
 		<?php
 		do_action( 'woocommerce_review_order_before_cart_contents' );
 

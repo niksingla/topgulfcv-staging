@@ -34,7 +34,7 @@
       <label for="html">Click here to agree to our <a href="">terms & conditions.</a></label>
     </div> -->
 
-                    <a href="/signup" class="check_button">Checkout</a>
+                    <a href="/checkout" class="check_button">Checkout</a>
                 </form>
             </div>
 

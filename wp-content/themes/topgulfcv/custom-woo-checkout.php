@@ -1,7 +1,48 @@
 <?php
-use WPDesk\FCF\Free\Settings\Form\EditFieldsForm;
 use WPDesk\FCF\Free\Settings\Option\CustomFieldOption;
-use WPDesk\FCF\Free\Service\TemplateLoader;
+
+
+add_action('wp', function() {
+    if (WC()->session && !is_admin() && !is_ajax() && ( !WC()->session->get('chosen_payment_method') || WC()->session->get('chosen_payment_method') !== 'ppcp-gateway' )) {
+        WC()->session->set('chosen_payment_method', 'ppcp-gateway');
+    }
+});
+
+add_action('wp_ajax_uplaod_the_cv_manually', 'uplaod_the_cv_manually');
+add_action('wp_ajax_nopriv_uplaod_the_cv_manually', 'uplaod_the_cv_manually');
+
+function uplaod_the_cv_manually() {
+    if (!isset($_POST['woocommerce-process-checkout-nonce']) || 
+        !wp_verify_nonce(sanitize_text_field($_POST['woocommerce-process-checkout-nonce']), 'woocommerce-process_checkout')) {
+        wp_send_json_error(['message' => 'Session Expired']);
+        wp_die();
+    }
+    if (!empty($_FILES['billing_uploaded_resume'])) {
+        $file = $_FILES['billing_uploaded_resume'];    
+        $nonce = sanitize_text_field($_POST['woocommerce-process-checkout-nonce']);
+        $filename = $nonce . '_' . sanitize_file_name($file['name']);
+
+        $upload_dir = wp_upload_dir();
+        $target_dir = $upload_dir['basedir'] . '/temp_uploads/';
+        wp_mkdir_p($target_dir);
+
+        $target_file = $target_dir . $filename;
+        if (move_uploaded_file($file['tmp_name'], $target_file)) {
+            $file_url = $upload_dir['baseurl'] . '/temp_uploads/' . $filename;
+            wp_send_json_success([
+                'message' => 'File uploaded successfully', 
+                'file_url' => $file_url, 
+                'file_name' => $filename
+            ]);
+        } else {
+            wp_send_json_error(['message' => 'Failed to upload file']);
+        }        
+    } else {
+        wp_send_json_error('No file uploaded');
+        wp_die();
+    }
+}
+
 
 add_action( 'woocommerce_order_status_processing', 'handle_paid_services_on_processing_order', 10, 1 );
 
@@ -57,6 +98,18 @@ function add_paid_services( $user_id, $order_id ){
         $post_id = wp_insert_post($post_data);
 
         if (!is_wp_error($post_id)) {
+
+            /**Send Email to customer */
+            $options = get_option('custom_email_options');
+            $custom_subject = $options['custom_email_subject'] ?? 'Thank You for Your Order';
+            $custom_message = get_custom_email_message(); 
+            $message = get_email_template_custom($custom_message, $service_name);
+            if ($user_email) {
+                $headers = array('Content-Type: text/html; charset=UTF-8');
+                wp_mail($user_email, $custom_subject, $message, $headers);
+                update_option( 'test7', 'pass' );
+            }
+
             // Update custom fields with WooCommerce billing information
             update_field("email", $user_email, $post_id);
             update_field("first_name11", $billing_first_name, $post_id);
@@ -69,21 +122,46 @@ function add_paid_services( $user_id, $order_id ){
             update_post_meta( $post_id, 'order_number', $order_id );
 
             // Handle uploaded resume file
-            update_option( 'test5', [$_FILES,$_POST] );
-            if (isset($_FILES['uploaded_resume'])) {
-                update_option( 'test4', 'upload' );
+            if (isset($_POST['uploaded_resume'])) {
+                if (!isset($_POST['woocommerce-process-checkout-nonce']) || 
+                    !wp_verify_nonce(sanitize_text_field($_POST['woocommerce-process-checkout-nonce']), 'woocommerce-process_checkout')) {
+                    return $post_id;
+                }                            
                 $upload_dir = wp_upload_dir();
                 $user_folder = $upload_dir['basedir'] . '/cvs/' . $post_id;
+                
                 if (!file_exists($user_folder)) {
                     wp_mkdir_p($user_folder);
                 }
-                $file = $_FILES['uploaded_resume'];
-                $file_name = sanitize_file_name($file['name']);
+            
+                // Retrieve the file URL from the POST data
+                $file_url = sanitize_text_field($_POST['uploaded_resume']);
+                $file_name = basename($file_url);
+            
+                
+                
+                // Check if the file exists in the temporary folder and move it to the permanent directory
+                $temp_file_path = $upload_dir['basedir'] . '/temp_uploads/' . $file_name;
+                
+                // Remove the nonce from the file name before saving
+                $file_name = str_replace($_POST['woocommerce-process-checkout-nonce'], '', $file_name);
+                
+                // Define the file path where it will be saved
                 $file_path = $user_folder . '/' . $file_name;
-                $saved = move_uploaded_file($file['tmp_name'], $file_path);
-                if ($saved) {
-                    $resume_url = $upload_dir['baseurl'] . '/cvs/' . $post_id . '/' . $file_name;
-                    update_post_meta($post_id, 'uploaded_resume', $resume_url);
+                
+                if (file_exists($temp_file_path)) {
+                    $saved = rename($temp_file_path, $file_path);
+                    
+                    if ($saved) {
+                        // Update post meta with the new file URL
+                        $resume_url = $upload_dir['baseurl'] . '/cvs/' . $post_id . '/' . $file_name;
+                        update_post_meta($post_id, 'uploaded_resume', $resume_url);
+            
+                        // Optionally, remove the temporary file if still exists
+                        if (file_exists($temp_file_path)) {
+                            unlink($temp_file_path);
+                        }
+                    }
                 }
             }
             return $post_id;
@@ -91,6 +169,52 @@ function add_paid_services( $user_id, $order_id ){
     }
     return false;
 }
+
+/**Email Template */
+function get_email_template_custom($custom_message, $services){
+    $message = "<table border='0' cellpadding='0' cellspacing='0' width='100%' class='wrapperBody' style='max-width:600px'>
+        <tbody>
+            <tr>
+                <td align='center' valign='top'>
+                    <table border='0' cellpadding='0' cellspacing='0' width='100%' class='tableCard' style='background-color:#fff;border-color:#e5e5e5;border-style:solid;border-width:0 1px 1px 1px;'>
+                        <tbody>
+                            <tr>
+                                <td style='background-color:#00d2f4;font-size:1px;line-height:3px' class='topBorder' height='3'>&nbsp;</td>
+                            </tr>
+                            <tr>
+                                <td style='padding-top: 60px; padding-bottom: 20px;' align='center' valign='middle' class='emailLogo'>
+                                    <a href='#' style='text-decoration:none' target='_blank'>
+                                        <img alt='' border='0' src='https://topgulfcv.com/wp-content/themes/topgulfcv/images/topgulf.png' style='width:100%;max-width:150px;height:auto;display:block' width='150'>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='padding-left:20px;padding-right:20px' align='center' valign='top' class='containtTable ui-sortable'>
+                                    <table border='0' cellpadding='0' cellspacing='0' width='100%' class='tableButton'>
+                                        <tbody>
+                                            <tr>
+                                                <td style='padding-left:20px;padding-right:20px' valign='top' class='containtTable ui-sortable'>
+                                                    $custom_message
+                                                </td>
+                                            </tr>   
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style='font-size:1px;line-height:1px' height='20'>&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>";
+    $serv = "$services";
+    $message = str_replace('[service_names]',$serv,$message);
+    return $message;
+}
+
 
 function get_order_item_names($order) {
     $item_names = [];
@@ -103,33 +227,44 @@ function get_order_item_names($order) {
     return $item_names;
 }
 
-// add_filter('woocommerce_checkout_fields', function($fields) {
-//     $condition = true; // Replace with your condition
-//     if ($condition) {
-//         $fields['billing']['uploaded_resume'] = [
-//             'type'        => 'file',
-//             'label'       => __('Resume (PDF only)', 'woocommerce'),
-//             'required'    => true,
-//             'class'       => ['form-row-wide'],
-//             'validate'    => ['file'],
-//         ];
-//     }
-//     return $fields;
-// },10000);
+
+//add_filter('woocommerce_checkout_fields', function($fields) {})    
 
 function custom_input_html($output, $key, $args, $value){
-
     if (true || ! isset( $args[ CustomFieldOption::FIELD_NAME ] ) || ! $args[ CustomFieldOption::FIELD_NAME ] ) {			                
-        $custom_attributes = [];
-        $field_type  = $args['type'];            
+        $custom_attributes = [];        
+        if($args['id'] == 'billing_uploaded_resume'){
+            $is_resume_upload = false;
+            foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
+                $product = $cart_item['data'];
+                $product_id = $cart_item['product_id'];
+                $product_tags = get_the_terms( $product_id, 'product_tag' );                        
+                if($product_tags){
+                    foreach ($product_tags as $tag) {
+                        if(get_term($tag)->name=="resume_upload"){
+                            $is_resume_upload = true;
+                        }    
+                    }
+                }        
+            }
+            if($is_resume_upload){
+                $args['type'] = 'file';
+                $args['required'] = true;
+            } 
+        }
+
+        $field_type  = $args['type'];
         if(file_exists(__DIR__."/flexible-checkout-fields/fields/$field_type.php")){
             ob_start();
             require "flexible-checkout-fields/fields/$field_type.php";
             $output = ob_get_clean();        
-        } else if('file' == $field_type || $field_type == 'country' && file_exists(__DIR__."/flexible-checkout-fields/fields/custom.php")) {            
+        } else if(('file' == $field_type && 'billing_uploaded_resume' == $args['id']) || $field_type == 'country' && file_exists(__DIR__."/flexible-checkout-fields/fields/custom.php")) {            
             ob_start();
             require "flexible-checkout-fields/fields/custom.php";
             $output = ob_get_clean();
+        }
+        if(!$is_resume_upload && $args['id'] == 'billing_uploaded_resume'){
+            $output = '';
         }
         return $output;                
     }

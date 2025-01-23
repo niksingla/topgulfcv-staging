@@ -95,83 +95,16 @@ if (! $checkout->is_registration_enabled() && $checkout->is_registration_require
         
             <?php do_action('woocommerce_checkout_before_customer_details'); ?>
 
-            <div class="col col-lg-4 col-md-6" id="customer_details-custom">
+            <div class="col col-lg-6 col-md-6" id="customer_details-custom">
                 <div class="all-form">
                     <div class="form-inner">
-                        <?php do_action( 'woocommerce_checkout_billing' ); ?>
-                        <?php
-                        $my_items = [];
-                        $total = 0;
-                        $is_resume_upload = false;
-                        foreach (WC()->cart->get_cart() as $cart_item_key => $cart_item) {
-                            $product = $cart_item['data'];
-                            $product_id = $cart_item['product_id'];
-                            $product_tags = get_the_terms($product_id, 'product_tag');
-                            if ($product_tags) {
-                                foreach ($product_tags as $tag) {
-                                    if (get_term($tag)->name == "resume_upload") {
-                                        $is_resume_upload = true;
-                                    }
-                                }
-                            }
-                            $my_items[] = get_post($product_id)->post_title;
-                            $total += wc_get_product($product_id)->price;
-                        }
-                        if ( !empty($my_items)): ?>
-        
-                            
-                            <?php if ($is_resume_upload) { // if CV/Resume Analysis is selected 
-                            ?>
-                                <div class="form-group">
-                                    <div class="upload-left-image">
-                                        <label class="file">
-                                            <span class='file-name'>Upload CV*</span>
-                                            <input type="file" name="uploaded_resume" ondragover="allowDrop(event)" oninput="cvChange(event)" ondrop="handleDrop(event)" id="ui_cv_input" required />
-                                            <p id="cvError" class="error"></p>
-                                        </label>
-        
-                                    </div>
-                                    <p class="selected-file d-none"></p>
-                                </div>
-                                <div class="form-group">
-                                    <label> * Field Required </label>
-                                </div>
-                            <?php } ?>
-                            <?php if ($is_resume_upload) { // if CV/Resume Analysis is selected 
-                            ?>
-                                <script type="text/javascript">
-                                    function allowDrop(event) {
-                                        event.preventDefault()
-                                    }
-        
-                                    function cvChange(event) {
-                                        document.querySelector('span.file-name').innerHTML = event.target.files[0].name
-                                    }
-        
-                                    function handleDrop(event) {
-                                        event.preventDefault();
-                                        const fileInput = document.getElementById('ui_cv_input');
-                                        const dropArea = document.getElementById('dropArea');
-                                        const files = event.dataTransfer.files;
-                                        if (files.length > 0) {
-                                            fileInput.files = files;
-                                            fileInput.dispatchEvent(new Event('change'));
-                                            document.querySelector('span.file-name').innerHTML = files[0].name
-                                        }
-                                    }
-                                </script>
-                            <?php } ?>
-                        <?php else:  ?>
-                            <h2>No services added to the cart.</h2>
-                            <a href="/paid-services/" class="red-btn my-2 my-sm-4">Continue Shopping</a>
-        
-                        <?php endif; ?>
+                        <?php do_action( 'woocommerce_checkout_billing' ); ?>                        
                     </div>
                 </div>                                    
                 <?php do_action('woocommerce_checkout_after_customer_details'); ?>
             </div>
         <?php endif; ?>
-        <div class="col col-lg-8 col-md-6">
+        <div class="col col-lg-6 col-md-6">
 
             <?php do_action('woocommerce_checkout_before_order_review_heading'); ?>
         

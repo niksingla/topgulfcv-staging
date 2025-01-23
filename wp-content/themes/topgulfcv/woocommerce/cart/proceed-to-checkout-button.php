@@ -29,7 +29,7 @@ foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
  }
 ?>
 
-<a href="<?= site_url('signup')?>" id="myloader" class="checkout-button button alt wc-forward<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>">
+<a href="<?= site_url('checkout')?>" id="myloader" class="checkout-button button alt wc-forward<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>">
 	<?php esc_html_e( 'Proceed to checkout', 'woocommerce' ); ?>
 </a>
 <img src="" class="loader" />

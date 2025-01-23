@@ -324,19 +324,10 @@ $echo = ob_get_clean();
     echo $echo;
 }
 function add_animation_script()
-{
-    $order = wc_get_order(4437);
-    $item_names = [];
-    foreach ($order->get_items() as $item) {
-        $product = wc_get_product($item->get_product_id());
-        if ($product) {
-            $item_names[] = $product->get_name();
-        }
-    }
-    
+{   
     ?>
 	<script type="text/javascript">
-		console.log(<?php echo json_encode($item_names);?>);
+		// console.log(<?php echo json_encode(WC()->session->get('chosen_payment_method'));?>);
         
 	</script>
 	<?php
