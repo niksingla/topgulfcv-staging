@@ -307,14 +307,14 @@ function topgulfcv_admin_page_content()
 			<select id="primary_menu_select" name="primary_menu_select">
 				<option value="">--Select a Menu--</option>
 				<?php
-$selected = get_option("topgulf_primary_menu");
-    $all_menus = wp_get_nav_menus();
-    foreach ($all_menus as $menu) {?>
-					<option value="<?=$menu->term_id?>" <?php echo $selected == $menu->term_id
-        ? "selected"
-        : ""; ?>><?=$menu->name?></option>
-					<?php }
-    ?>
+                $selected = get_option("topgulf_primary_menu");
+                    $all_menus = wp_get_nav_menus();
+                    foreach ($all_menus as $menu) {?>
+                                    <option value="<?=$menu->term_id?>" <?php echo $selected == $menu->term_id
+                        ? "selected"
+                        : ""; ?>><?=$menu->name?></option>
+                                    <?php }
+                    ?>
 			</select>
 			<p><input class="button button-primary" type="submit" name="submit" value="Submit"></p>
 		</form>
@@ -2135,14 +2135,40 @@ add_action('admin_init', function () {
         'permalink',
         'free_services_permalink_section'
     );
+    add_settings_field(
+        'free_services_archive_page',
+        __('Free Services Archive Page', 'topgulfcv'),
+        function () {
+            $selected_page = get_option('free_services_archive_page', 139);
+            $pages = get_pages();
+
+            echo '<select name="free_services_archive_page">';
+            echo '<option value="0">' . __('— Select a Page —', 'topgulfcv') . '</option>';
+
+            foreach ($pages as $page) {
+                echo '<option value="' . $page->ID . '" ' . selected($selected_page, $page->ID, false) . '>' . esc_html($page->post_title) . '</option>';
+            }
+
+            echo '</select>';
+            echo '<p class="description">' . __('Select a page to use as the Free Services archive page.', 'topgulfcv') . '</p>';
+        },
+        'permalink',
+        'free_services_permalink_section'
+    );
 
     register_setting('permalink', 'free_services_slug');
+    register_setting('permalink', 'free_services_archive_page');
 });
 
 add_action('admin_init', function () {
     if (isset($_POST['free_services_slug'])) {
         $new_slug = sanitize_text_field($_POST['free_services_slug']);
         update_option('free_services_slug', $new_slug);
+        flush_rewrite_rules();
+    }
+    if (isset($_POST['free_services_archive_page'])) {
+        $archive_page_id = absint($_POST['free_services_archive_page']);
+        update_option('free_services_archive_page', $archive_page_id);
         flush_rewrite_rules();
     }
 });
@@ -2152,7 +2178,22 @@ add_action('init', function () {
     global $wp_post_types;
 
     if (isset($wp_post_types['add_free_services'])) {
-        $wp_post_types['add_free_services']->rewrite['slug'] = $free_services_slug;
+        $wp_post_types['add_free_services']->rewrite['slug'] = rtrim($free_services_slug,'/');
         $wp_post_types['add_free_services']->rewrite['with_front'] = true;
     }
 }, 20);
+
+add_filter('template_include', function ($template) {
+    $archive_page_id = get_option('free_services_archive_page', 0);
+
+    if (is_post_type_archive('add_free_services') && $archive_page_id) {
+        $page_template = get_page_template_slug($archive_page_id);
+        if ($page_template) {
+            return locate_template($page_template);
+        } else {
+            return get_page_template();
+        }
+    }
+
+    return $template;
+});
