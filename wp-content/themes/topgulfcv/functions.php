@@ -2111,3 +2111,48 @@ add_action('wp_head', 'preload_style_css');
 
 /**Customize woocommerce checkout fields */
 require 'custom-woo-checkout.php';
+
+
+/** Permalink options */
+add_action('admin_init', function () {
+    add_settings_section(
+        'free_services_permalink_section',
+        __('Free Services Permalinks', 'topgulfcv'),
+        function () {
+            echo '<p>' . __('Configure the permalink structure for Free Services.', 'topgulfcv') . '</p>';
+        },
+        'permalink'
+    );
+
+    add_settings_field(
+        'free_services_slug',
+        __('Free Services Slug', 'topgulfcv'),
+        function () {
+            $value = get_option('free_services_slug', 'service');
+            echo '<input type="text" name="free_services_slug" value="' . esc_attr($value) . '" class="regular-text" />';
+            echo '<p class="description">' . __('Enter the slug for Free Services. Default: service.', 'topgulfcv') . '</p>';
+        },
+        'permalink',
+        'free_services_permalink_section'
+    );
+
+    register_setting('permalink', 'free_services_slug');
+});
+
+add_action('admin_init', function () {
+    if (isset($_POST['free_services_slug'])) {
+        $new_slug = sanitize_text_field($_POST['free_services_slug']);
+        update_option('free_services_slug', $new_slug);
+        flush_rewrite_rules();
+    }
+});
+
+add_action('init', function () {
+    $free_services_slug = get_option('free_services_slug', 'service');
+    global $wp_post_types;
+
+    if (isset($wp_post_types['add_free_services'])) {
+        $wp_post_types['add_free_services']->rewrite['slug'] = $free_services_slug;
+        $wp_post_types['add_free_services']->rewrite['with_front'] = true;
+    }
+}, 20);

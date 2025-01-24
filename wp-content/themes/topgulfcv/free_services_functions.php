@@ -466,7 +466,7 @@ function add_free_services_post_type()
         "publicly_queryable" => true,
         "capability_type" => "page",
         "rewrite" => [
-            "slug" => "service", 
+            "slug" => (get_option('free_services_slug', 'service')), 
             "with_front" => true, 
         ],
     ];
