@@ -19,7 +19,7 @@ function getCartProducts() {
     })
         .then(response => response.json())
         .then(data => {
-            if (data.data && data.data.length) {
+            if (data.data) {
                 cartItems = data.data
                 localStorage.setItem('cartItems', JSON.stringify(cartItems))
                 updateCart()
